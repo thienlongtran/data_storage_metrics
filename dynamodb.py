@@ -10,10 +10,6 @@ def create_table():
                 {
                     "AttributeName": "job_id",
                     "AttributeType": "N"
-                },
-                {
-                    "AttributeName": "status",
-                    "AttributeType": "S"
                 }
             ],
             TableName = dynamodb_table_name,
@@ -21,10 +17,6 @@ def create_table():
                 {
                     "AttributeName": "job_id",
                     "KeyType": "HASH"
-                },
-                {
-                    "AttributeName": "status",
-                    "KeyType": "RANGE"
                 }
             ],
             BillingMode = "PAY_PER_REQUEST"
@@ -33,8 +25,8 @@ def create_table():
     return response
 
 def generate_and_add_data():
-    JOB_IDS = range(100000)
-    JOB_STATUSES = ["queued", "in_progress", "completed", "completed", "completed", "completed"]
+    JOB_IDS = range(3000)
+    JOB_STATUSES = ["queued", "in_progress", "completed", "completed", "completed", "completed", "completed", "completed", "completed", "completed"]
 
     for id in JOB_IDS:
         workflow_job = {
@@ -52,6 +44,18 @@ def generate_and_add_data():
             Item = workflow_job
         )
 
+def get_items(status):
+    response = dynamodb_client.scan(
+        TableName = dynamodb_table_name,
+        ScanFilter = {"status": {
+            "ComparisonOperator": "EQ",
+            "AttributeValueList": [ {"S": "queued"} ]
+        }}
+    )
+
+    print(response["Items"])
+
 if __name__ == "__main__":
-    create_table()
-    generate_and_add_data()
+    #create_table()
+    #generate_and_add_data()
+    get_items("queued")
