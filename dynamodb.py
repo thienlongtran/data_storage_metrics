@@ -72,9 +72,9 @@ def get_items(status):
             "fwafewagf": item["fwafewagf"]["S"]
         }
         
-    print(seen)
+    print(len(seen))
 
 if __name__ == "__main__":
     #create_table()
-    generate_and_add_data()
-    #get_items("queued")
+    #generate_and_add_data()
+    get_items("queued")
