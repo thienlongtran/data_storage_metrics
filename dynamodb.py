@@ -8,6 +8,10 @@ def create_table():
     response = dynamodb_client.create_table(
             AttributeDefinitions = [
                 {
+                    "AttributeName": "status",
+                    "AttributeType": "S"
+                },
+                {
                     "AttributeName": "job_id",
                     "AttributeType": "N"
                 }
@@ -15,8 +19,12 @@ def create_table():
             TableName = dynamodb_table_name,
             KeySchema = [
                 {
-                    "AttributeName": "job_id",
+                    "AttributeName": "status",
                     "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "job_id",
+                    "KeyType": "RANGE"
                 }
             ],
             BillingMode = "PAY_PER_REQUEST"
@@ -25,7 +33,7 @@ def create_table():
     return response
 
 def generate_and_add_data():
-    JOB_IDS = range(3000)
+    JOB_IDS = range(30000)
     JOB_STATUSES = ["queued", "in_progress", "completed", "completed", "completed", "completed", "completed", "completed", "completed", "completed"]
 
     for id in JOB_IDS:
@@ -53,9 +61,21 @@ def get_items(status):
         }}
     )
 
-    print(response["Items"])
+    seen = {}
+
+    for item in response["Items"]:
+        seen[item["job_id"]["N"]] = {
+            "status": item["status"]["S"],
+            "repository": item["repository"]["S"],
+            "started_at": item["started_at"]["S"],
+            "starteat": item["starteat"]["S"],
+            "star323": item["star323"]["S"],
+            "fwafewagf": item["fwafewagf"]["S"]
+        }
+        
+    print(seen)
 
 if __name__ == "__main__":
     #create_table()
-    #generate_and_add_data()
-    get_items("queued")
+    generate_and_add_data()
+    #get_items("queued")
