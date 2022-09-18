@@ -1,5 +1,6 @@
 import random
 import boto3
+from boto3.dynamodb.conditions import Key
 
 dynamodb_client = boto3.client("dynamodb")
 dynamodb_table_name = "project-talia"
@@ -8,7 +9,7 @@ def create_table():
     response = dynamodb_client.create_table(
             AttributeDefinitions = [
                 {
-                    "AttributeName": "status",
+                    "AttributeName": "job_status",
                     "AttributeType": "S"
                 },
                 {
@@ -19,7 +20,7 @@ def create_table():
             TableName = dynamodb_table_name,
             KeySchema = [
                 {
-                    "AttributeName": "status",
+                    "AttributeName": "job_status",
                     "KeyType": "HASH"
                 },
                 {
@@ -39,7 +40,7 @@ def generate_and_add_data():
     for id in JOB_IDS:
         workflow_job = {
             "job_id": {"N": str(id)},
-            "status": {"S": random.choice(JOB_STATUSES)},
+            "job_status": {"S": random.choice(JOB_STATUSES)},
             "repository": {"S": "testing123"},
             "started_at": {"S": "blankblankblank"},
             "starteat": {"S": "blankblankblank"},
@@ -53,19 +54,17 @@ def generate_and_add_data():
         )
 
 def get_items(status):
-    response = dynamodb_client.scan(
+    response = dynamodb_client.query(
         TableName = dynamodb_table_name,
-        ScanFilter = {"status": {
-            "ComparisonOperator": "EQ",
-            "AttributeValueList": [ {"S": "queued"} ]
-        }}
+        KeyConditionExpression = "job_status = :target_status",
+        ExpressionAttributeValues={":target_status": {"S": status}}
     )
 
     seen = {}
 
     for item in response["Items"]:
         seen[item["job_id"]["N"]] = {
-            "status": item["status"]["S"],
+            "status": item["job_status"]["S"],
             "repository": item["repository"]["S"],
             "started_at": item["started_at"]["S"],
             "starteat": item["starteat"]["S"],
